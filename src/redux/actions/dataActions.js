@@ -7,12 +7,33 @@ import {
     DELETE_SCREAM,
     POST_SCREAM,
     SET_ERRORS,
-    CLEAR_ERRORS,
+    CLEAR_ERRORS,                                             
     LOADING_UI,
-    STOP_LOADING_UI
+    STOP_LOADING_UI,
+    SUBMIT_COMMENT
   } from '../types';
   import axios from 'axios';
   
+  //Summit a comment
+  export const submitComment = (screamId,commentData) => (dispatch) =>{
+    dispatch({type: LOADING_UI});
+    axios.post(`https://europe-west1-project-management-4a011.cloudfunctions.net/api/scream/${screamId}/comment`,commentData)
+    .then( res => {
+      dispatch({
+        type: SUBMIT_COMMENT,
+        payload: res.data
+      });
+      dispatch(clearErrors());
+      dispatch({type: STOP_LOADING_UI});
+      
+    })
+    .catch(err => {
+      dispatch({
+        type:SET_ERRORS,
+        payload : err.response.data
+      })
+    });
+  }
   // Get all screams
   export const getScreams = () => (dispatch) => {
     dispatch({ type: LOADING_DATA });
@@ -97,7 +118,26 @@ export const postScream = (newScream) => (dispatch) => {
       dispatch({type:STOP_LOADING_UI});
     })
     .catch(err => console.log(err));
-  }
+  };
+  //get a user
+  export const getUserData = (userHandle) => (dispatch) => {
+    dispatch({ type: LOADING_DATA });
+    axios
+      .get(`https://europe-west1-project-management-4a011.cloudfunctions.net/api/user/${userHandle}`)
+      .then((res) => {
+        dispatch({
+          type: SET_SCREAMS,
+          payload: res.data.screams
+        });
+      })
+      .catch(() => {
+        dispatch({
+          type: SET_SCREAMS,
+          payload: null
+        });
+      });
+  };
+
   export const clearErrors = () => (dispatch) => {
     dispatch({ type: CLEAR_ERRORS });
   };
